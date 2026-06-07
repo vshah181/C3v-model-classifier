@@ -5,9 +5,9 @@ from kmesh import make_irreducible_klist
 from hamiltonian import (fixed_hamiltonian, fixed_r_hamiltonian, 
                          fixed_r__hamiltonian, hamiltonian)
 from search import find_nodes
-from io_utils import write_nodes
+from io_utils import write_nodes, write_heatmap
 from constants import load_parameters
-from classification import get_weyl_chirality
+from classification import get_weyl_chirality, get_z2_indices
 from user_options import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX, PAR_2_MIN, 
                           PAR_2_MAX, LOOSE_TOLERANCE)
 
@@ -32,6 +32,7 @@ def main():
     
     r_vals = np.linspace(PAR_1_MIN, PAR_1_MAX, NPAR_1)
     r__vals = np.linspace(PAR_2_MIN, PAR_2_MAX, NPAR_2)
+    heatmap = np.zeros((NPAR_1, NPAR_2))
     hams = fixed_hams[None, None, :, :, :]\
          + r_vals[:, None, None, None, None] * fixed_r_hams[None, None, :, :, :]\
          + r__vals[None, :, None, None, None] * fixed_r__hams[None, None, :, :, :]
@@ -79,6 +80,26 @@ def main():
     else:
         print("Couldn't find any Weyl nodes")
 
+    # Now we need to look at the rest of the (r, r') pairs
+    # loop through and ditch the ones with Weyl?
+
+    for ir, r in enumerate(r_vals):
+        for ir_, r_ in enumerate(r__vals):
+            key = (ir, ir_)
+            if key not in unique_candidates:
+                z2_indices = get_z2_indices(hamiltonian, r, r_, parameters)
+                strong_index = z2_indices[0]
+                weak_indices = np.array(z2_indices[1:])
+                if strong_index != 0:
+                    heatmap[ir, ir_] = 3
+                elif any(weak_indices != 0):
+                    heatmap[ir, ir_] = 2
+                else:
+                    heatmap[ir, ir_] = 1
+            elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
+                heatmap[ir, ir_] = 4
+
+    write_heatmap(r_vals, r__vals, heatmap)
     print(f"took {(time.time() - start_time):.1f} seconds.")
 
 if __name__ == "__main__":

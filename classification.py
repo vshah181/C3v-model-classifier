@@ -57,8 +57,8 @@ def get_z2_indices(hamiltonian_func, r, r_, parameters):
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
     x0 = z2pack.invariant.z2(get_x0_data(z2pack_sys))
     x1 = z2pack.invariant.z2(get_x1_data(z2pack_sys))
-    y1 = z2pack.invariant.z2(get_x2_data(z2pack_sys))
-    z1 = z2pack.invariant.z2(get_x3_data(z2pack_sys))
+    y1 = z2pack.invariant.z2(get_y1_data(z2pack_sys))
+    z1 = z2pack.invariant.z2(get_z1_data(z2pack_sys))
 
     v0 = int((x0 + x1) % 2)
     v1 = int(x1)
