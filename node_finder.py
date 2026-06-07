@@ -2,10 +2,12 @@ import numpy as np
 import time
 
 from kmesh import make_irreducible_klist
-from hamiltonian import fixed_hamiltonian, fixed_r_hamiltonian, fixed_r__hamiltonian
+from hamiltonian import (fixed_hamiltonian, fixed_r_hamiltonian, 
+                         fixed_r__hamiltonian, hamiltonian)
 from search import find_nodes
 from io_utils import write_nodes
 from constants import load_parameters
+from classification import get_weyl_chirality
 from user_options import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX, PAR_2_MIN, 
                           PAR_2_MAX, LOOSE_TOLERANCE)
 
@@ -54,10 +56,23 @@ def main():
             key = (r_idx, r__idx)
             cross_coord = crossing_point.copy()
             if key not in unique_candidates:
-                unique_candidates[key] = {"gap": gap, "k": cross_coord}
+                unique_candidates[key] = {"gap": gap, "k": cross_coord, "chirality": 0}
             else:
                 if gap < unique_candidates[key]["gap"]:
-                    unique_candidates[key] = {"gap": gap, "k": cross_coord}
+                    unique_candidates[key] = {"gap": gap, "k": cross_coord, "chirality": 0}
+
+    """ 
+    Now we have unique candidates all with a tiny gap.
+    We must check the chirality. They are all 0 by default.
+    """
+    if unique_candidates:
+        print("Found some points. Checking their chiralities...")
+        for (r_idx, r__idx), info in unique_candidates.items():
+            r = r_vals[r_idx]
+            r_ = r__vals[r__idx]
+            gap = info["gap"]
+            info["chirality"] = get_weyl_chirality(hamiltonian, r, r_,
+                                                   parameters, info["k"])
 
     if unique_candidates:
         write_nodes(unique_candidates, r_vals, r__vals)

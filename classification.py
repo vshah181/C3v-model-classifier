@@ -1,3 +1,4 @@
+import logging
 import z2pack
 
 
@@ -14,8 +15,12 @@ def initialise_z2pack_system(hamiltonian_func, r, r_, p, num_occ=2):
 
 
 def get_weyl_chirality(hamiltonian_func, r, r_, parameters, kpoint, radius=0.005):
+    logging.getLogger("z2pack").setLevel(logging.WARNING) # Very annoying otherwise
+
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
-    result = z2pack.surface_run(system=z2pack_sys, 
+    result = z2pack.surface.run(system=z2pack_sys, 
                                 surface=z2pack.shape.Sphere(kpoint, radius),
-                                save=None, load=None)
+                                save_file=None, load=None,
+                                min_neighbour_dist=5.0E-4)
+    return z2pack.invariant.chern(result)
 
