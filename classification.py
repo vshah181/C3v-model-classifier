@@ -27,28 +27,28 @@ def get_weyl_chirality(hamiltonian_func, r, r_, parameters, kpoint, radius=0.005
 
 def get_x0_data(system):
     logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-4,
+    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-3,
                                 surface=lambda t1, t2: [0, t1/2, t2])
     return result
 
 
 def get_x1_data(system):
     logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-4,
+    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-3,
                                 surface=lambda t1, t2: [0.5, t1/2, t2])
     return result
 
 
 def get_y1_data(system):
     logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-4,
+    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-3,
                                 surface=lambda t1, t2: [t1/2, 0.5, t2])
     return result
 
 
 def get_z1_data(system):
     logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-4,
+    result = z2pack.surface.run(system=system, min_neighbour_dist=5.0E-3,
                                 surface=lambda t1, t2: [t1/2, t2, 0.5])
     return result
 
