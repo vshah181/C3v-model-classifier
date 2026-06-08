@@ -107,12 +107,6 @@ def main():
                                repeat(parameters))
         for ir, ir_, value in results:
             heatmap[ir, ir_] = value
-    # for ikey in range(len(r_r__index_pairs)):
-    #     ir = r_r__index_pairs[ikey, 0]
-    #     ir_ = r_r__index_pairs[ikey, 1]
-    #     job = (ir, ir_)
-    #     r_idx, r__idx, heatmap[ir, ir_] = classify_pair(job, r_vals, r__vals,
-    #                                      unique_candidates, parameters)
 
     print(f"took {(time.time() - start_time):.1f} seconds.")
 
