@@ -85,21 +85,32 @@ def main():
     # loop through and ditch the ones with Weyl?
 
     print("Now checking Z2 indices")
-    for ir, r in enumerate(r_vals):
-        for ir_, r_ in enumerate(r__vals):
-            key = (ir, ir_)
-            if key not in unique_candidates:
-                z2_indices = get_z2_indices(hamiltonian, r, r_, parameters)
-                strong_index = z2_indices[0]
-                weak_indices = np.array(z2_indices[1:])
-                if strong_index != 0:
-                    heatmap[ir, ir_] = 3
-                elif any(weak_indices != 0):
-                    heatmap[ir, ir_] = 2
-                else:
-                    heatmap[ir, ir_] = 1
-            elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
-                heatmap[ir, ir_] = 4
+    r_r__index_pairs = np.empty((NPAR_1 * NPAR_2, 2), dtype=int)
+    ikey = 0
+    for ir in range(len(r_vals)):
+        for ir_ in range(len(r__vals)):
+            r_r__index_pairs[ikey, 0] = ir
+            r_r__index_pairs[ikey, 1] = ir_
+            ikey += 1
+
+    for ikey in range(len(r_r__index_pairs)):
+        ir = r_r__index_pairs[ikey, 0]
+        ir_ = r_r__index_pairs[ikey, 1]
+        r = r_vals[ir]
+        r_ = r__vals[ir_]
+        key = (ir, ir_)
+        if key not in unique_candidates:
+            z2_indices = get_z2_indices(hamiltonian, r, r_, parameters)
+            strong_index = z2_indices[0]
+            weak_indices = np.array(z2_indices[1:])
+            if strong_index != 0:
+                heatmap[ir, ir_] = 3
+            elif any(weak_indices != 0):
+                heatmap[ir, ir_] = 2
+            else:
+                heatmap[ir, ir_] = 1
+        elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
+            heatmap[ir, ir_] = 4
 
     print(f"took {(time.time() - start_time):.1f} seconds.")
 
