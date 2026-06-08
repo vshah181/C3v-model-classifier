@@ -42,8 +42,8 @@ def plot_phase_diagram(fname, delim=None):
     ax = fig.add_subplot(111)
 
     extent = [np.min(x_vals), np.max(x_vals), np.min(y_vals), np.max(y_vals)]
-    im = ax.imshow(grid, origin="lower", extent=extent, cmap=cmap, norm=norm,
-                   interpolation="nearest")
+    ax.imshow(grid, origin="lower", extent=extent, cmap=cmap, norm=norm,
+              interpolation="nearest")
     ax.set_xlabel(r"$r$")
     ax.set_ylabel(r"$r \prime$")
 
