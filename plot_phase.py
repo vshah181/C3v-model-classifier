@@ -33,7 +33,7 @@ def plot_phase_diagram(fname, delim=None):
             iz += 1
 
     # Make the figure and the axes
-    colours = ["#C263FA", "#6463FA", "#FF6978", "#2EAA7F", "#999999"]
+    colours = ["#999999", "#6463FA", "#FF6978", "#2EAA7F", "#FFB363"]
     cmap = ListedColormap(colours)
     bounds = np.arange(-0.5, 5, 1)
     norm = BoundaryNorm(bounds, cmap.N)
