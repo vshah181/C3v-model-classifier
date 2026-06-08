@@ -1,5 +1,8 @@
 import numpy as np
 import time
+from concurrent.futures import ProcessPoolExecutor
+from itertools import repeat
+import os
 
 from kmesh import make_irreducible_klist
 from hamiltonian import (fixed_hamiltonian, fixed_r_hamiltonian, 
@@ -7,7 +10,7 @@ from hamiltonian import (fixed_hamiltonian, fixed_r_hamiltonian,
 from search import find_nodes
 from io_utils import write_nodes, write_heatmap
 from constants import load_parameters
-from classification import get_weyl_chirality, get_z2_indices
+from classification import get_weyl_chirality, get_z2_indices, classify_pair
 from plot_phase import plot_phase_diagram
 from user_options import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX, PAR_2_MIN, 
                           PAR_2_MAX, LOOSE_TOLERANCE)
@@ -93,24 +96,23 @@ def main():
             r_r__index_pairs[ikey, 1] = ir_
             ikey += 1
 
-    for ikey in range(len(r_r__index_pairs)):
-        ir = r_r__index_pairs[ikey, 0]
-        ir_ = r_r__index_pairs[ikey, 1]
-        r = r_vals[ir]
-        r_ = r__vals[ir_]
-        key = (ir, ir_)
-        if key not in unique_candidates:
-            z2_indices = get_z2_indices(hamiltonian, r, r_, parameters)
-            strong_index = z2_indices[0]
-            weak_indices = np.array(z2_indices[1:])
-            if strong_index != 0:
-                heatmap[ir, ir_] = 3
-            elif any(weak_indices != 0):
-                heatmap[ir, ir_] = 2
-            else:
-                heatmap[ir, ir_] = 1
-        elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
-            heatmap[ir, ir_] = 4
+    n_workers = int(os.environ.get("MY_NUM_WORKERS", 6))
+    with ProcessPoolExecutor(max_workers=n_workers) as executor:
+        # submit all jobs in parallel
+        results = executor.map(classify_pair, 
+                               map(tuple, r_r__index_pairs),
+                               repeat(r_vals),
+                               repeat(r__vals),
+                               repeat(unique_candidates),
+                               repeat(parameters))
+        for ir, ir_, value in results:
+            heatmap[ir, ir_] = value
+    # for ikey in range(len(r_r__index_pairs)):
+    #     ir = r_r__index_pairs[ikey, 0]
+    #     ir_ = r_r__index_pairs[ikey, 1]
+    #     job = (ir, ir_)
+    #     r_idx, r__idx, heatmap[ir, ir_] = classify_pair(job, r_vals, r__vals,
+    #                                      unique_candidates, parameters)
 
     print(f"took {(time.time() - start_time):.1f} seconds.")
 

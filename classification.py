@@ -1,5 +1,31 @@
 import logging
 import z2pack
+from hamiltonian import hamiltonian
+import numpy as np
+
+
+def classify_pair(idx_pair, r_vals, r__vals, unique_candidates, parameters):
+    ir = idx_pair[0]
+    ir_ = idx_pair[1]
+
+    r = r_vals[ir]
+    r_ = r__vals[ir_]
+    key = (ir, ir_)
+    if key not in unique_candidates:
+        z2_indices = get_z2_indices(hamiltonian, r, r_, parameters)
+        strong_index = z2_indices[0]
+        weak_indices = np.array(z2_indices[1:])
+        if strong_index != 0:
+            result = 3
+        elif any(weak_indices != 0):
+            result = 2
+        else:
+            result = 1
+    elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
+        result = 4
+    else:
+        result = 0
+    return ir, ir_, result
 
 
 def make_z2pack_hamiltonian(hamiltonian_func, r, r_, p):
