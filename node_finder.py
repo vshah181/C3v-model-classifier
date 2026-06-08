@@ -8,6 +8,7 @@ from search import find_nodes
 from io_utils import write_nodes, write_heatmap
 from constants import load_parameters
 from classification import get_weyl_chirality, get_z2_indices
+from plot_phase import plot_phase_diagram
 from user_options import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX, PAR_2_MIN, 
                           PAR_2_MAX, LOOSE_TOLERANCE)
 
@@ -83,6 +84,7 @@ def main():
     # Now we need to look at the rest of the (r, r') pairs
     # loop through and ditch the ones with Weyl?
 
+    print("Now checking Z2 indices")
     for ir, r in enumerate(r_vals):
         for ir_, r_ in enumerate(r__vals):
             key = (ir, ir_)
@@ -99,8 +101,10 @@ def main():
             elif 0.9 < abs(unique_candidates[key]["chirality"]) < 1.1:
                 heatmap[ir, ir_] = 4
 
-    write_heatmap(r_vals, r__vals, heatmap)
     print(f"took {(time.time() - start_time):.1f} seconds.")
+
+    write_heatmap(r_vals, r__vals, heatmap, fname="phase_digram.csv")
+    plot_phase_diagram(fname="phase_digram.csv", delim=",")
 
 if __name__ == "__main__":
     main()

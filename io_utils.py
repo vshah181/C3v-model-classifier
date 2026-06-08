@@ -14,6 +14,8 @@ def write_nodes(unique_candidates, r_vals, r__vals, fname="Nodes.dat"):
 
 def write_heatmap(r_vals, r__vals, heatmap, fname="phase_diagram.csv"):
     with open(fname, "w") as f:
+        f.write("#    r     ,     r'    , phase\n")
+        f.write("#------------------------------\n")
         for ir, r in enumerate(r_vals):
             for ir_, r_ in enumerate(r__vals):
-                f.write(f"{r:11.7f} {r_:11.7f} {heatmap[ir, ir_]:4.1f}\n")
+                f.write(f"{r:11.7f}, {r_:11.7f}, {heatmap[ir, ir_]:4.1f}\n")
