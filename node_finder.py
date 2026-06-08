@@ -108,10 +108,10 @@ def main():
         for ir, ir_, value in results:
             heatmap[ir, ir_] = value
 
-    print(f"took {(time.time() - start_time):.1f} seconds.")
-
     write_heatmap(r_vals, r__vals, heatmap, fname="phase_digram.csv")
     plot_phase_diagram(fname="phase_digram.csv", delim=",")
+
+    print(f"took {(time.time() - start_time):.1f} seconds.")
 
 if __name__ == "__main__":
     main()
