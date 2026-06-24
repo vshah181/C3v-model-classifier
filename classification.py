@@ -1,7 +1,18 @@
 import logging
 import z2pack
 from hamiltonian import hamiltonian
+import warnings
 import numpy as np
+
+
+def needs_retry(warning_list):
+    for w in warning_list:
+        msg = str(w.message)
+        if "Iterator stopped before the calculation could converge" in msg:
+            return True
+        elif "'min_neighbour_dist' reached: cannot add line at" in msg:
+            return True
+    return False
 
 
 def classify_pair(idx_pair, r_vals, r__vals, unique_candidates, parameters):
@@ -55,9 +66,9 @@ def get_z2_data(syst, surf):
     logging.getLogger("z2pack").setLevel(logging.CRITICAL)
     neighbour_dist = 1.0E-4
     n_lines = 12
-    pos_tlnc = 1.0E-2
-    gap_tlnc = 3.0E-1
-    mov_tlnc = 3.0E-1
+    itr_num_start = 8
+    itr_num_end = 27
+    itr_num_step = 2
 
     for attempt in range(3):
         with warnings.catch_warnings(record=True) as w:
@@ -66,10 +77,25 @@ def get_z2_data(syst, surf):
                                         min_neighbour_dist=neighbour_dist,
                                         surface=surf,
                                         num_lines=n_lines,
-                                        pos_tol=pos_tlnc,
-                                        gap_tol=gap_tlnc,
-                                        mov_tlnc=mov_tlnc)
+                                        iterator=range(itr_num_start,
+                                                       itr_num_end,
+                                                       itr_num_step))
+            if not needs_retry(w):
+                return result
+            neighbour_dist *= 0.25
+            n_lines += 6
+            itr_num_end += 6
 
+    """
+    result = z2pack.surface.run(system=syst,
+                                min_neighbour_dist=neighbour_dist,
+                                surface=surf,
+                                num_lines=n_lines,
+                                pos_tol=pos_tlnc,
+                                gap_tol=gap_tlnc,
+                                move_tol=mov_tlnc)
+
+    """
     return result
 
 
@@ -77,11 +103,11 @@ def get_z2_indices(hamiltonian_func, r, r_, parameters):
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
     x0 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
                                          lambda t1, t2: [0.0, t1/2, t2]))
-    x1 = z2pack.invariant.z2(get_x1_data(z2pack_sys,
+    x1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
                                          lambda t1, t2: [0.5, t1/2, t2]))
-    y1 = z2pack.invariant.z2(get_y1_data(z2pack_sys,
+    y1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
                                          lambda t1, t2: [t1/2, 0.5, t2]))
-    z1 = z2pack.invariant.z2(get_z1_data(z2pack_sys,
+    z1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
                                          lambda t1, t2: [t1/2, t2, 0.5]))
 
     v0 = int((x0 + x1) % 2)
