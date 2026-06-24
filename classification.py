@@ -96,6 +96,7 @@ def get_z2_data(syst, surf):
                                 move_tol=mov_tlnc)
 
     """
+    print("Warning, there may have been a Z2Pack problem!")
     return result
 
 
