@@ -41,7 +41,7 @@ def initialise_z2pack_system(hamiltonian_func, r, r_, p, num_occ=2):
 
 
 def get_weyl_chirality(hamiltonian_func, r, r_, parameters, kpoint, radius=0.005):
-    logging.getLogger("z2pack").setLevel(logging.WARNING) # Very annoying otherwise
+    logging.getLogger("z2pack").setLevel(logging.CRITICAL) # Very annoying otherwise
 
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
     result = z2pack.surface.run(system=z2pack_sys, 
@@ -51,44 +51,38 @@ def get_weyl_chirality(hamiltonian_func, r, r_, parameters, kpoint, radius=0.005
     return z2pack.invariant.chern(result)
 
 
-def get_x0_data(system):
-    logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=1.0E-4,
-                                surface=lambda t1, t2: [0, t1/2, t2],
-                                num_lines=10)
-    return result
+def get_z2_data(syst, surf):
+    logging.getLogger("z2pack").setLevel(logging.CRITICAL)
+    neighbour_dist = 1.0E-4
+    n_lines = 12
+    pos_tlnc = 1.0E-2
+    gap_tlnc = 3.0E-1
+    mov_tlnc = 3.0E-1
 
+    for attempt in range(3):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = z2pack.surface.run(system=syst,
+                                        min_neighbour_dist=neighbour_dist,
+                                        surface=surf,
+                                        num_lines=n_lines,
+                                        pos_tol=pos_tlnc,
+                                        gap_tol=gap_tlnc,
+                                        mov_tlnc=mov_tlnc)
 
-def get_x1_data(system):
-    logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=1.0E-4,
-                                surface=lambda t1, t2: [0.5, t1/2, t2],
-                                num_lines=10)
-    return result
-
-
-def get_y1_data(system):
-    logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=1.0E-4,
-                                surface=lambda t1, t2: [t1/2, 0.5, t2],
-                                num_lines=10)
-    return result
-
-
-def get_z1_data(system):
-    logging.getLogger("z2pack").setLevel(logging.WARNING)
-    result = z2pack.surface.run(system=system, min_neighbour_dist=1.0E-4,
-                                surface=lambda t1, t2: [t1/2, t2, 0.5],
-                                num_lines=10)
     return result
 
 
 def get_z2_indices(hamiltonian_func, r, r_, parameters):
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
-    x0 = z2pack.invariant.z2(get_x0_data(z2pack_sys))
-    x1 = z2pack.invariant.z2(get_x1_data(z2pack_sys))
-    y1 = z2pack.invariant.z2(get_y1_data(z2pack_sys))
-    z1 = z2pack.invariant.z2(get_z1_data(z2pack_sys))
+    x0 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
+                                         lambda t1, t2: [0.0, t1/2, t2]))
+    x1 = z2pack.invariant.z2(get_x1_data(z2pack_sys,
+                                         lambda t1, t2: [0.5, t1/2, t2]))
+    y1 = z2pack.invariant.z2(get_y1_data(z2pack_sys,
+                                         lambda t1, t2: [t1/2, 0.5, t2]))
+    z1 = z2pack.invariant.z2(get_z1_data(z2pack_sys,
+                                         lambda t1, t2: [t1/2, t2, 0.5]))
 
     v0 = int((x0 + x1) % 2)
     v1 = int(x1)
