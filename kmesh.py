@@ -1,7 +1,7 @@
 import numpy as np
 import spglib
 from constants import LATTICE_VECTORS, RECIP_VECTORS
-from user_options import NKX, NKY, NKZ
+from user_options_local import NKX, NKY, NKZ
 
 def make_irreducible_klist():
     nk1 = NKX

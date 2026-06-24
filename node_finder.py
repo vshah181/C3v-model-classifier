@@ -12,8 +12,8 @@ from io_utils import write_nodes, write_heatmap
 from constants import load_parameters
 from classification import get_weyl_chirality, classify_pair
 from plot_phase import plot_phase_diagram
-from user_options import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX, PAR_2_MIN, 
-                          PAR_2_MAX, LOOSE_TOLERANCE)
+from user_options_local import (NPAR_1, NPAR_2, PAR_1_MIN, PAR_1_MAX,
+                          PAR_2_MIN, PAR_2_MAX, LOOSE_TOLERANCE)
 
 
 def main():

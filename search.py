@@ -2,7 +2,7 @@ import math
 import numpy as np
 from scipy.optimize import minimize
 
-from user_options import TIGHT_TOLERANCE
+from user_options_local import TIGHT_TOLERANCE
 from hamiltonian import hamiltonian
 
 
