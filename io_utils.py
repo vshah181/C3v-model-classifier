@@ -9,7 +9,7 @@ def write_nodes(unique_candidates, r_vals, r__vals, fname="Nodes.dat"):
             gap = info["gap"]
             charge = info["chirality"]
             f.write(f"{r:6.3f}|{r_:6.3f}|({k1:8.5f},{k2:8.5f},{k3:8.5f})")
-            f.write(f"| {gap:8.3E} | {charge:9.6f} \n")
+            f.write(f"| {gap:8.2E} | {charge:9.6f} \n")
 
 
 def write_heatmap(r_vals, r__vals, heatmap, fname="phase_diagram.csv"):

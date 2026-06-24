@@ -64,7 +64,7 @@ def plot_phase_diagram(fname, delim=None):
               bbox_to_anchor=(1, 0.5), frameon=False)
 
     plt.tight_layout()
-    plt.savefig("phase_diagram.pdf")
+    plt.savefig("phase_diagram_small.pdf")
 
 
 def main():

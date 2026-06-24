@@ -16,10 +16,10 @@ def find_nodes(kfrac, r, r_, p):
     klim = [(-0.5, 0.5), (-0.5, 0.5), (-0.5, 0.5)]
     start = kfrac
     
-    # Derivative-free local minimisation from a starting guess
-    # Gradients around Weyl nodes can get messy, COBYQA maybe more robust
+    # Gradients around Weyl nodes can get messy, COBYQA maybe more robust?
+    # But squaring the gap should address this (hopefully)
     result = minimize(fun=gap_squared, args=(r, r_, p), x0=start, 
-                      method="COBYQA", bounds=klim)
+                      method="L-BFGS-B", bounds=klim)
 
     gap = np.sqrt(result.fun)
     found_node = (gap <= TIGHT_TOLERANCE)
