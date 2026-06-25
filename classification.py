@@ -1,19 +1,20 @@
 import logging
+import sys
 import z2pack
 from hamiltonian import hamiltonian
 import warnings
 import numpy as np
 
 
-def needs_retry(warning_list):
-    for w in warning_list:
-        msg = str(w.message)
-        if "Iterator stopped before the calculation could converge" in msg:
-            return True
-        elif "'min_neighbour_dist' reached: cannot add line at" in msg:
-            return True
-    return False
+def needs_retry(convergence_report):
 
+    def check_block(block):
+        return all(len(v.get("FAILED", [])) == 0 for v in block.values())
+
+    return not(
+        check_block(convergence_report.get("line", {})) and
+        check_block(convergence_report.get("surface", {}))
+    )
 
 def classify_pair(idx_pair, r_vals, r__vals, unique_candidates, parameters):
     ir = idx_pair[0]
@@ -70,7 +71,7 @@ def get_z2_data(syst, surf):
     itr_num_end = 27
     itr_num_step = 2
 
-    for attempt in range(3):
+    for attempt in range(5):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             result = z2pack.surface.run(system=syst,
@@ -80,8 +81,12 @@ def get_z2_data(syst, surf):
                                         iterator=range(itr_num_start,
                                                        itr_num_end,
                                                        itr_num_step))
-            if not needs_retry(w):
+            if not needs_retry(result.convergence_report):
                 return result
+            
+            warning_message = "REMARK: could not converge on the first try. "
+            warning_message += "Trying again with different parameters..."
+            sys.stderr.write(warning_message + "\n")
             neighbour_dist *= 0.25
             n_lines += 6
             itr_num_end += 6
