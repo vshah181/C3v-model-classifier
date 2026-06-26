@@ -1,8 +1,9 @@
 import numpy as np
 
 from kmesh import kfrac_to_kcart
-from constants import (LATTICE_VECTORS, K00, KZ0, K01, K02, K03, KZ1, KZ2, KZ3, 
+from constants import (K00, KZ0, K01, K02, K03, KZ1, KZ2, KZ3, 
                     K0Z, KZZ, KX0, KYZ, KXZ, KY0, KY1, KY2, KY3)
+from user_options_local import LATTICE_VECTORS
 
 
 def fixed_hamiltonian(kfrac, p):

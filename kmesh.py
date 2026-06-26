@@ -1,25 +1,22 @@
 import numpy as np
 import spglib
-from constants import LATTICE_VECTORS, RECIP_VECTORS
-from user_options_local import NKX, NKY, NKZ
+from constants import RECIP_VECTORS
+from user_options_local import LATTICE_VECTORS, NKX, NKY, NKZ, POSITIONS
 
 def make_irreducible_klist():
     nk1 = NKX
     nk2 = NKY
     nk3 = NKZ
-    lattice_vectors = LATTICE_VECTORS.copy()
 
-    # Completely arbitrary. Just want C3v point symmetry.
-    positions = np.array([[0.0000000000, 0.0000000000, 0.46322936],
-                          [0.3333333333, 0.6666666667, 0.21480074],
-                          [0.6666666667, 0.3333333333, 0.76576990]])
+    lattice_vectors = LATTICE_VECTORS.copy()
+    positions = POSITIONS.copy()
 
     numbers = [1, 2, 3]
     cell = (lattice_vectors, positions, numbers)
     mesh = np.array([nk1, nk2, nk3])
     is_shift = np.zeros(3)
     mapping_table, grid_address = spglib.get_ir_reciprocal_mesh(mesh, cell,
-                                                                is_shift=is_shift, 
+                                                                is_shift=is_shift,
                                                                 is_time_reversal=True, 
                                                                 symprec=1e-5)
     ir_kpoints_frac = []
