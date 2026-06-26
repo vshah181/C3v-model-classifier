@@ -2,7 +2,6 @@ import logging
 import sys
 import z2pack
 from hamiltonian import hamiltonian
-import warnings
 import numpy as np
 
 
@@ -72,35 +71,23 @@ def get_z2_data(syst, surf):
     itr_num_step = 2
 
     for attempt in range(5):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            result = z2pack.surface.run(system=syst,
-                                        min_neighbour_dist=neighbour_dist,
-                                        surface=surf,
-                                        num_lines=n_lines,
-                                        iterator=range(itr_num_start,
-                                                       itr_num_end,
-                                                       itr_num_step))
-            if not needs_retry(result.convergence_report):
-                return result
-            
-            warning_message = "REMARK: could not converge on the first try. "
-            warning_message += "Trying again with different parameters..."
-            sys.stderr.write(warning_message + "\n")
-            neighbour_dist *= 0.25
-            n_lines += 6
-            itr_num_end += 6
+        result = z2pack.surface.run(system=syst,
+                                    min_neighbour_dist=neighbour_dist,
+                                    surface=surf,
+                                    num_lines=n_lines,
+                                    iterator=range(itr_num_start,
+                                                   itr_num_end,
+                                                   itr_num_step))
+        if not needs_retry(result.convergence_report):
+            return result
+        
+        warning_message = "REMARK: could not converge on the first try. "
+        warning_message += "Trying again with different parameters..."
+        sys.stderr.write(warning_message + "\n")
+        neighbour_dist *= 0.25
+        n_lines += 6
+        itr_num_end += 6
 
-    """
-    result = z2pack.surface.run(system=syst,
-                                min_neighbour_dist=neighbour_dist,
-                                surface=surf,
-                                num_lines=n_lines,
-                                pos_tol=pos_tlnc,
-                                gap_tol=gap_tlnc,
-                                move_tol=mov_tlnc)
-
-    """
     print("Warning, there may have been a Z2Pack problem!")
     return result
 
