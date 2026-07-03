@@ -62,7 +62,7 @@ def get_weyl_chirality(hamiltonian_func, r, r_, parameters, kpoint, radius=0.005
     return z2pack.invariant.chern(result)
 
 
-def get_z2_data(syst, surf):
+def get_z2_data(syst, surf, r, r_):
     logging.getLogger("z2pack").setLevel(logging.CRITICAL)
     neighbour_dist = 1.0E-4
     n_lines = 12
@@ -81,27 +81,33 @@ def get_z2_data(syst, surf):
         if not needs_retry(result.convergence_report):
             return result
         
-        warning_message = "REMARK: could not converge on the first try. "
-        warning_message += "Trying again with different parameters..."
-        sys.stderr.write(warning_message + "\n")
+        remark_message = "REMARK: could not converge on the first try. "
+        remark_message += "Trying again with different parameters..."
+        print(remark_message)
         neighbour_dist *= 0.25
         n_lines += 6
         itr_num_end += 6
 
-    print("Warning, there may have been a Z2Pack problem!")
+    warning_message = "Warning, there may have been a Z2Pack problem! "
+    warning_message += f"At point {r:.6f} {r_:.6f}.\n"
+    sys.stderr.write(warning_message)
     return result
 
 
 def get_z2_indices(hamiltonian_func, r, r_, parameters):
     z2pack_sys = initialise_z2pack_system(hamiltonian_func, r, r_, parameters)
     x0 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
-                                         lambda t1, t2: [0.0, t1/2, t2]))
+                                         lambda t1, t2: [0.0, t1/2, t2],
+                                         r, r_))
     x1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
-                                         lambda t1, t2: [0.5, t1/2, t2]))
+                                         lambda t1, t2: [0.5, t1/2, t2],
+                                         r, r_))
     y1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
-                                         lambda t1, t2: [t1/2, 0.5, t2]))
+                                         lambda t1, t2: [t1/2, 0.5, t2],
+                                         r, r_))
     z1 = z2pack.invariant.z2(get_z2_data(z2pack_sys,
-                                         lambda t1, t2: [t1/2, t2, 0.5]))
+                                         lambda t1, t2: [t1/2, t2, 0.5],
+                                         r, r_))
 
     v0 = int((x0 + x1) % 2)
     v1 = int(x1)

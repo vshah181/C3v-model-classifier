@@ -5,8 +5,8 @@ from itertools import repeat
 import os
 
 from kmesh import make_irreducible_klist
-from hamiltonian import (fixed_hamiltonian, fixed_r_hamiltonian, 
-                         fixed_r__hamiltonian, hamiltonian)
+from hamiltonian import (fixed_hamiltonian, fixed_c__hamiltonian, 
+                         fixed_a12_hamiltonian, hamiltonian)
 from search import find_nodes
 from io_utils import write_nodes, write_heatmap
 from constants import load_parameters
@@ -24,41 +24,41 @@ def main():
     nkp = len(kgrid_coarse)
 
     fixed_hams = np.empty((nkp, 4, 4), dtype=complex)
-    fixed_r_hams = np.empty((nkp, 4, 4), dtype=complex)
-    fixed_r__hams = np.empty((nkp, 4, 4), dtype=complex)
+    fixed_c__hams = np.empty((nkp, 4, 4), dtype=complex)
+    fixed_a12_hams = np.empty((nkp, 4, 4), dtype=complex)
     hams = np.empty((NPAR_1, NPAR_2, nkp, 4, 4), dtype=complex)
 
     for ik, kfrac in enumerate(kgrid_coarse):
         fixed_hams[ik] = fixed_hamiltonian(kfrac, parameters)
-        fixed_r_hams[ik] = fixed_r_hamiltonian(kfrac)
-        fixed_r__hams[ik] = fixed_r__hamiltonian(kfrac)
+        fixed_c__hams[ik] = fixed_c__hamiltonian(kfrac)
+        fixed_a12_hams[ik] = fixed_a12_hamiltonian(kfrac)
     
     
-    r_vals = np.linspace(PAR_1_MIN, PAR_1_MAX, NPAR_1)
-    r__vals = np.linspace(PAR_2_MIN, PAR_2_MAX, NPAR_2)
+    c__vals = np.linspace(PAR_1_MIN, PAR_1_MAX, NPAR_1)
+    a12_vals = np.linspace(PAR_2_MIN, PAR_2_MAX, NPAR_2)
     heatmap = np.zeros((NPAR_1, NPAR_2))
     hams = fixed_hams[None, None, :, :, :]\
-         + r_vals[:, None, None, None, None] * fixed_r_hams[None, None, :, :, :]\
-         + r__vals[None, :, None, None, None] * fixed_r__hams[None, None, :, :, :]
+         + c__vals[:, None, None, None, None] * fixed_c__hams[None, None, :, :, :]\
+         + a12_vals[None, :, None, None, None] * fixed_a12_hams[None, None, :, :, :]
 
     eigenvals = np.linalg.eigvalsh(hams)
     differences = np.abs(eigenvals[..., 2] - eigenvals[..., 1])
 
-    r_idx_all, r__idx_all, k_idx_all = np.where(differences < LOOSE_TOLERANCE)
+    c__idx_all, a12_idx_all, k_idx_all = np.where(differences < LOOSE_TOLERANCE)
     unique_candidates = {}
     print("Checking candidate points...")
-    for i in range(len(r_idx_all)):
-        r_idx = r_idx_all[i]
-        r__idx = r__idx_all[i]
-        r = r_vals[r_idx]
-        r_ = r__vals[r__idx]
+    for i in range(len(c__idx_all)):
+        c__idx = c__idx_all[i]
+        a12_idx = a12_idx_all[i]
+        c_ = c__vals[c__idx]
+        a12 = a12_vals[a12_idx]
 
         k_idx = k_idx_all[i]
         k = kgrid_coarse[k_idx]
 
-        node_found, gap, crossing_point = find_nodes(k, r, r_, parameters)
+        node_found, gap, crossing_point = find_nodes(k, c_, a12, parameters)
         if node_found:
-            key = (r_idx, r__idx)
+            key = (c__idx, a12_idx)
             cross_coord = crossing_point.copy()
             if key not in unique_candidates:
                 unique_candidates[key] = {"gap": gap, "k": cross_coord, "chirality": 0}
@@ -72,15 +72,15 @@ def main():
     """
     if unique_candidates:
         print("Found some points. Checking their chiralities...")
-        for (r_idx, r__idx), info in unique_candidates.items():
-            r = r_vals[r_idx]
-            r_ = r__vals[r__idx]
+        for (c__idx, a12_idx), info in unique_candidates.items():
+            c_ = c__vals[c__idx]
+            a12 = a12_vals[a12_idx]
             gap = info["gap"]
-            info["chirality"] = get_weyl_chirality(hamiltonian, r, r_,
+            info["chirality"] = get_weyl_chirality(hamiltonian, c_, a12,
                                                    parameters, info["k"])
 
     if unique_candidates:
-        write_nodes(unique_candidates, r_vals, r__vals)
+        write_nodes(unique_candidates, c__vals, a12_vals)
     else:
         print("Couldn't find any Weyl nodes")
 
@@ -88,28 +88,28 @@ def main():
     # loop through and ditch the ones with Weyl?
 
     print("Now checking Z2 indices")
-    r_r__index_pairs = np.empty((NPAR_1 * NPAR_2, 2), dtype=int)
+    c__a12_index_pairs = np.empty((NPAR_1 * NPAR_2, 2), dtype=int)
     ikey = 0
-    for ir in range(len(r_vals)):
-        for ir_ in range(len(r__vals)):
-            r_r__index_pairs[ikey, 0] = ir
-            r_r__index_pairs[ikey, 1] = ir_
+    for ic_ in range(len(c__vals)):
+        for ia12 in range(len(a12_vals)):
+            c__a12_index_pairs[ikey, 0] = ic_
+            c__a12_index_pairs[ikey, 1] = ia12
             ikey += 1
 
     n_workers = int(os.environ.get("MY_NUM_WORKERS", 6))
     with ProcessPoolExecutor(max_workers=n_workers) as executor:
         # submit all jobs in parallel
         results = executor.map(classify_pair, 
-                               map(tuple, r_r__index_pairs),
-                               repeat(r_vals),
-                               repeat(r__vals),
+                               map(tuple, c__a12_index_pairs),
+                               repeat(c__vals),
+                               repeat(a12_vals),
                                repeat(unique_candidates),
                                repeat(parameters))
-        for ir, ir_, value in results:
-            heatmap[ir, ir_] = value
+        for ic_, ia12, value in results:
+            heatmap[ic_, ia12] = value
 
-    write_heatmap(r_vals, r__vals, heatmap, fname="phase_digram.csv")
-    plot_phase_diagram(fname="phase_digram.csv", delim=",")
+    write_heatmap(c__vals, a12_vals, heatmap, fname="phase_diagram.csv")
+    plot_phase_diagram(fname="phase_diagram.csv", delim=",")
 
     print(f"took {(time.time() - start_time):.1f} seconds.")
 

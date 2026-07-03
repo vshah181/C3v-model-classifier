@@ -30,13 +30,13 @@ def fixed_hamiltonian(kfrac, p):
     c = p[0]
     mxy = p[1]
     mz = p[2]
-    c_ = p[3]
+    # c_ = p[3]
     mxy_ = p[4]
     mz_ = p[5]
-    # r = p[6]
+    r = p[6]
     rxy = p[7]
     rz = p[8]
-    # r_ = p[9]
+    r_ = p[9]
     rxy_ = p[10]
     rz_ = p[11]
     q = p[12]
@@ -46,7 +46,7 @@ def fixed_hamiltonian(kfrac, p):
     a5 = p[16]
     a69 = p[17]
     a101 = p[18]
-    a12 = p[19]
+    # a12 = p[19]
     a76 = p[20]
     a108 = p[21]
     a184 = p[22]
@@ -58,17 +58,16 @@ def fixed_hamiltonian(kfrac, p):
     disp_coeff += mz * (1.0 + ckz)
     disp_part = disp_coeff * K00
 
-    disp_coeff_ = c_ + mxy_ * (3.0 - ck1 - ck2 - ck3)
-    disp_coeff_ += mz_ * (1.0 + ckz)
+    disp_coeff_ = mxy_ * (3.0 - ck1 - ck2 - ck3) + mz_ * (1.0 + ckz)
     disp_part_ = disp_coeff_ * KZ0
 
-    spin_part_r =  rxy * (3.0 - ck1 - ck2 - ck3) + rz * (1.0 + ckz)
+    spin_part_r =  r + rxy * (3.0 - ck1 - ck2 - ck3) + rz * (1.0 + ckz)
     spin_part_s =  sk1 * K01
     spin_part_s += sk2 * K02
     spin_part_s += sk3 * K03
     spin_part = spin_part_r * spin_part_s
 
-    spin_part_r_ =  rxy_ * (3.0 - ck1 - ck2 - ck3) + rz_ * (1.0 + ckz)
+    spin_part_r_ =  r_ + rxy_ * (3.0 - ck1 - ck2 - ck3) + rz_ * (1.0 + ckz)
     spin_part_s_ =  sk1 * KZ1
     spin_part_s_ += sk2 * KZ2
     spin_part_s_ += sk3 * KZ3
@@ -92,7 +91,7 @@ def fixed_hamiltonian(kfrac, p):
     first_a_coeff += a101 * (1 + ckz)
     a_part1 = first_a_coeff * KX0
 
-    second_a_coeff = a12 + a76 * (3.0 - ck1 - ck2 - ck3)
+    second_a_coeff = a76 * (3.0 - ck1 - ck2 - ck3)
     second_a_coeff += a108 * (1 + ckz)
     a_part2 = second_a_coeff * KYZ
 
@@ -114,54 +113,24 @@ def fixed_hamiltonian(kfrac, p):
     return hk
 
 
-def fixed_r_hamiltonian(kfrac):
+def fixed_c__hamiltonian(kfrac):
     """
     Calculate the analytical hamiltonian over the mesh
     """
-    kcart = kfrac_to_kcart(kfrac)
-
-    k1 = np.dot(kcart, LATTICE_VECTORS[0])
-    k2 = np.dot(kcart, LATTICE_VECTORS[1])
-    k3 = -1.0 * (k1 + k2)
-
-    sk1 = np.sin(k1)
-    sk2 = np.sin(k2)
-    sk3 = np.sin(k3)
-
-    spin_part_s = sk1 * K01
-    spin_part_s += sk2 * K02
-    spin_part_s += sk3 * K03
-    spin_part = spin_part_s
-
-    hk = spin_part 
+    hk = KZ0
     return hk
 
 
-def fixed_r__hamiltonian(kfrac):
+def fixed_a12_hamiltonian(kfrac):
     """
     Calculate the analytical hamiltonian over the mesh
     """
-    kcart = kfrac_to_kcart(kfrac)
-
-    k1 = np.dot(kcart, LATTICE_VECTORS[0])
-    k2 = np.dot(kcart, LATTICE_VECTORS[1])
-    k3 = -1.0 * (k1 + k2)
-
-    sk1 = np.sin(k1)
-    sk2 = np.sin(k2)
-    sk3 = np.sin(k3)
-
-    spin_part_s_ = sk1 * KZ1
-    spin_part_s_ += sk2 * KZ2
-    spin_part_s_ += sk3 * KZ3
-    spin_part_ =  spin_part_s_
-
-    hk =  spin_part_
+    hk = KYZ
     return hk
 
 
-def hamiltonian(kfrac, r, r_, p):
+def hamiltonian(kfrac, c_, a12, p):
     ham = fixed_hamiltonian(kfrac, p)
-    ham += r * fixed_r_hamiltonian(kfrac)
-    ham += r_ * fixed_r__hamiltonian(kfrac)
+    ham += c_ * fixed_c__hamiltonian(kfrac)
+    ham += a12 * fixed_a12_hamiltonian(kfrac)
     return ham

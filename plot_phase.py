@@ -4,7 +4,7 @@ from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.patches import Patch
 
 
-def plot_phase_diagram(fname, delim=None):
+def plot_phase_diagram(fname, delim=None, plotname="phase_diagram.pdf"):
     plt.rcParams["font.family"] = "Arial"
     plt.rcParams["mathtext.fontset"] = "custom"
     plt.rcParams["mathtext.rm"] = "Arial"
@@ -43,9 +43,9 @@ def plot_phase_diagram(fname, delim=None):
 
     extent = [np.min(x_vals), np.max(x_vals), np.min(y_vals), np.max(y_vals)]
     ax.imshow(grid, origin="lower", extent=extent, cmap=cmap, norm=norm,
-              interpolation="nearest")
-    ax.set_xlabel(r"$r$")
-    ax.set_ylabel(r"$r \prime$")
+              interpolation="nearest", aspect="auto")
+    ax.set_xlabel(r"$c \prime$")
+    ax.set_ylabel(r"$a_{12}$")
 
     value_labels = {
         0: "unknown",
@@ -64,11 +64,11 @@ def plot_phase_diagram(fname, delim=None):
               bbox_to_anchor=(1, 0.5), frameon=False)
 
     plt.tight_layout()
-    plt.savefig("phase_diagram_small.pdf")
+    plt.savefig(plotname)
 
 
 def main():
-    plot_phase_diagram(fname="phase_diagram.csv", delim=",")
+    plot_phase_diagram("phase_diagram.csv", ",", "phase_diagram.pdf")
 
 
 if __name__ == "__main__":
