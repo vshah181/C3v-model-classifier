@@ -41,6 +41,7 @@ def main():
     a5_vals = np.linspace(PAR_2_MIN, PAR_2_MAX, NPAR_2)
     a12_vals = (GRADIENT * a5_vals)  + INTERCEPT
     heatmap = np.zeros((NPAR_1, NPAR_2))
+    status = np.zeros((NPAR_1, NPAR_2))
     hams = fixed_hams[None, None, :, :, :]\
          + c__vals[:, None, None, None, None] * fixed_c__hams[None, None, :, :, :]\
          + a5_vals[None, :, None, None, None] * fixed_a5_hams[None, None, :, :, :]\
@@ -55,6 +56,7 @@ def main():
     for i in range(len(c__idx_all)):
         c__idx = c__idx_all[i]
         a5_idx = a5_idx_all[i]
+        status[c__idx, a5_idx] = 1.0
         c_ = c__vals[c__idx]
         a5 = a5_vals[a5_idx]
 
@@ -63,6 +65,7 @@ def main():
 
         node_found, gap, crossing_point = find_nodes(k, c_, a5, parameters)
         if node_found:
+            status[c__idx, a5_idx] = 2.0
             key = (c__idx, a5_idx)
             cross_coord = crossing_point.copy()
             if key not in unique_candidates:
@@ -109,7 +112,8 @@ def main():
                                repeat(c__vals),
                                repeat(a5_vals),
                                repeat(unique_candidates),
-                               repeat(parameters))
+                               repeat(parameters),
+                               repeat(status))
         for ic_, ia5, value in results:
             heatmap[ic_, ia5] = value
 
