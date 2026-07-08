@@ -3,7 +3,7 @@ import numpy as np
 from kmesh import kfrac_to_kcart
 from constants import (K00, KZ0, K01, K02, K03, KZ1, KZ2, KZ3, 
                     K0Z, KZZ, KX0, KYZ, KXZ, KY0, KY1, KY2, KY3)
-from user_options_local import LATTICE_VECTORS
+from user_options_local import LATTICE_VECTORS, GRADIENT, INTERCEPT
 
 
 def fixed_hamiltonian(kfrac, p):
@@ -43,7 +43,7 @@ def fixed_hamiltonian(kfrac, p):
     q_ = p[13]
     h = p[14]
     h_ = p[15]
-    a5 = p[16]
+    # a5 = p[16]
     a69 = p[17]
     a101 = p[18]
     # a12 = p[19]
@@ -87,7 +87,7 @@ def fixed_hamiltonian(kfrac, p):
     
     h_part_ = h_coeff * h_ * KZZ
 
-    first_a_coeff = a5 + a69 * (3.0 - ck1 - ck2 - ck3)
+    first_a_coeff = a69 * (3.0 - ck1 - ck2 - ck3)
     first_a_coeff += a101 * (1 + ckz)
     a_part1 = first_a_coeff * KX0
 
@@ -121,6 +121,14 @@ def fixed_c__hamiltonian(kfrac):
     return hk
 
 
+def fixed_a5_hamiltonian(kfrac):
+    """
+    Calculate the analytical hamiltonian over the mesh
+    """
+    hk = KX0
+    return hk
+
+
 def fixed_a12_hamiltonian(kfrac):
     """
     Calculate the analytical hamiltonian over the mesh
@@ -129,8 +137,10 @@ def fixed_a12_hamiltonian(kfrac):
     return hk
 
 
-def hamiltonian(kfrac, c_, a12, p):
+def hamiltonian(kfrac, c_, a5, p):
+    a12 = (GRADIENT * a5) + INTERCEPT
     ham = fixed_hamiltonian(kfrac, p)
     ham += c_ * fixed_c__hamiltonian(kfrac)
+    ham += a5 * fixed_a5_hamiltonian(kfrac)
     ham += a12 * fixed_a12_hamiltonian(kfrac)
     return ham

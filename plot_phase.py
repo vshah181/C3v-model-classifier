@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 from matplotlib.patches import Patch
+from user_options_local import GRADIENT, INTERCEPT
 
 
 def plot_phase_diagram(fname, delim=None, plotname="phase_diagram.pdf"):
@@ -20,7 +21,7 @@ def plot_phase_diagram(fname, delim=None, plotname="phase_diagram.pdf"):
     z = data[:, 2]
 
     x_vals = np.unique(x)
-    y_vals = np.unique(y)
+    y_vals = (np.unique(y) * GRADIENT) + INTERCEPT
     nx = len(x_vals)
     ny = len(y_vals)
 
@@ -45,7 +46,13 @@ def plot_phase_diagram(fname, delim=None, plotname="phase_diagram.pdf"):
     ax.imshow(grid, origin="lower", extent=extent, cmap=cmap, norm=norm,
               interpolation="nearest", aspect="auto")
     ax.set_xlabel(r"$c \prime$")
-    ax.set_ylabel(r"$a_{12}$")
+    if (INTERCEPT > 0):
+        sign = r" + "
+    else:
+        sign = r" - "
+    y_label_str = r"$a_{12} = " + f"{GRADIENT:.3f}" + r"\times a_{5}" + sign
+    y_label_str += f"{abs(INTERCEPT):.3f}" + r"$"
+    ax.set_ylabel(y_label_str)
 
     value_labels = {
         0: "unknown",
@@ -64,6 +71,7 @@ def plot_phase_diagram(fname, delim=None, plotname="phase_diagram.pdf"):
               bbox_to_anchor=(1, 0.5), frameon=False)
 
     plt.tight_layout()
+    #plt.show()
     plt.savefig(plotname)
 
 
