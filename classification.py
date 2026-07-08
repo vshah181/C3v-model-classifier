@@ -89,7 +89,7 @@ def get_z2_data(syst, surf, r, r_, status):
         itr_num_end += 6
 
     warning_message = "Warning, there may have been a Z2Pack problem! "
-    warning_message += f"At point = {r:.6f} {r_:.6f} "
+    warning_message += f"At point = {r:.7f} {r_:.7f} "
     warning_message += f"status = {int(status)}\n"
     sys.stderr.write(warning_message)
     return result
