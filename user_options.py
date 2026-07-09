@@ -1,3 +1,5 @@
+import numpy as np
+import line 
 # ------------------------------------------------------------
 # User parameters
 # ------------------------------------------------------------
@@ -6,15 +8,15 @@ TIGHT_TOLERANCE = 0.0001
 
 NKX = 41
 NKY = 41
-NKZ = 23
+NKZ = 25
 
 NPAR_1 = 30
 NPAR_2 = 30
 
-PAR_1_MIN = -0.5
-PAR_1_MAX =  0.5
-PAR_2_MIN = -0.5
-PAR_2_MAX =  0.5
+PAR_1_MIN = -2.50
+PAR_1_MAX =  2.50
+PAR_2_MIN = -1.00
+PAR_2_MAX =  0.35
 
 LATTICE_VECTORS = np.array([[3.5588157, -2.0546835, 0.0000000],
                             [0.0000000,  4.1093664, 0.0000000],
@@ -24,3 +26,5 @@ LATTICE_VECTORS = np.array([[3.5588157, -2.0546835, 0.0000000],
 POSITIONS = np.array([[0.0000000000, 0.0000000000, 0.46322936],
                       [0.3333333333, 0.6666666667, 0.21480074],
                       [0.6666666667, 0.3333333333, 0.76576990]], dtype=float)
+
+GRADIENT, INTERCEPT = line.get_parameters()
